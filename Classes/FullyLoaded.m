@@ -119,6 +119,30 @@ SYNTHESIZE_SINGLETON_FOR_CLASS(FullyLoaded);
 	return nil;
 }
 
+- (UIImage *)imageFromMemoryForURL:(NSString *)aURLString {
+	if (aURLString) {
+		UIImage *image = nil;
+		if ((image = [self.imageCache objectForKey:aURLString])) {
+			return image;
+		}		
+	}
+	return nil;
+}
+
+- (UIImage *)imageFromDiskForURL:(NSString *)aURLString {
+	if (aURLString) {
+		UIImage *image = nil;
+		if ((image = [self.imageCache objectForKey:aURLString])) {
+			return image;
+		} else if ((image = [UIImage imageWithContentsOfFile:[self pathForImage:aURLString]])) {
+			[self.imageCache setObject:image forKey:aURLString];
+			return image;
+      }
+	}
+	return nil;
+}
+
+
 - (NSString *)pathForImage:(NSString *)aURLString {
 	NSURL *url = [NSURL URLWithString:aURLString];
 	NSString *targetPath = [self.imageCachePath stringByAppendingPathComponent:[url host]];
@@ -163,6 +187,13 @@ SYNTHESIZE_SINGLETON_FOR_CLASS(FullyLoaded);
 	} else {
 		[[NSFileManager defaultManager] removeItemAtPath:[self pathForImage:[[request url] absoluteString]] error:nil];
 	}
+}
+
+- (void) setImage:(UIImage *)image forURL :(NSString *)aURLString
+{
+   NSURL * nsurl = [NSURL URLWithString:aURLString];
+   if (image)
+      [self.imageCache setObject:image forKey:[nsurl absoluteString]];
 }
 
 - (void)dealloc {

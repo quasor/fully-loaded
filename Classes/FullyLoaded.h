@@ -35,10 +35,14 @@
 
 + (FullyLoaded *)sharedFullyLoaded;
 - (void)emptyCache;
+- (void)setImage:(UIImage *)image forURL:(NSString *)aURLString;
 - (UIImage *)imageForURL:(NSString *)aURLString;
+- (UIImage *)imageFromMemoryForURL:(NSString *)aURLString;
+- (UIImage *)imageFromDiskForURL:(NSString *)aURLString;
 - (void)enqueueURLString:(NSString *)aURLString;
 - (void)resume;
 - (void)suspend;
 - (NSString *)pathForImage:(NSString *)aURLString;
+- (NSString *)directoryForImage:(NSString *)aURLString;
 
 @end
