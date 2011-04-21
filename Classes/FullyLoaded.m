@@ -34,7 +34,7 @@
 @property (nonatomic, readwrite, retain) ASINetworkQueue *networkQueue;
 @property (nonatomic, readwrite, retain) NSOperationQueue *responseQueue;
 @property (nonatomic, readwrite, retain) NSTimer *queueSuspensionTimer;
-@property (nonatomic, readwrite, retain) NSMutableDictionary *imageCache;
+@property (nonatomic, readwrite, retain) NSCache *imageCache;
 @property (nonatomic, readwrite, retain) NSString *imageCachePath;
 @property (nonatomic, readwrite, retain) NSMutableSet *inProgressURLStrings;
 @property (nonatomic, readwrite, retain) NSMutableArray *pendingURLStrings;
@@ -66,7 +66,9 @@ SYNTHESIZE_SINGLETON_FOR_CLASS(FullyLoaded);
 		
 		self.pendingURLStrings = [[NSMutableArray alloc] init];
 		self.inProgressURLStrings = [[NSMutableSet alloc] init];
-		self.imageCache = [[NSMutableDictionary alloc] init];
+		self.imageCache = [[NSCache alloc] init];
+      [self.imageCache setEvictsObjectsWithDiscardedContent:NO];
+      [self.imageCache setTotalCostLimit: 250];
 		self.imageCachePath = [[NSSearchPathForDirectoriesInDomains(NSCachesDirectory, NSUserDomainMask, YES) lastObject] 
 							   stringByAppendingPathComponent:@"images"];
 		[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(resume) name:FLIdleNotification object:nil];
@@ -104,7 +106,7 @@ SYNTHESIZE_SINGLETON_FOR_CLASS(FullyLoaded);
 		if ((image = [self.imageCache objectForKey:aURLString])) {
 			return image;
 		} else if ((image = [UIImage imageWithContentsOfFile:[self pathForImage:aURLString]])) {
-			[self.imageCache setObject:image forKey:aURLString];
+			[self.imageCache setObject:image forKey:[[aURLString copy] autorelease] cost:1];
 			return image;
 		} else if (![self.inProgressURLStrings containsObject:aURLString]) {
 			[self.inProgressURLStrings addObject:aURLString];
@@ -135,7 +137,7 @@ SYNTHESIZE_SINGLETON_FOR_CLASS(FullyLoaded);
 		if ((image = [self.imageCache objectForKey:aURLString])) {
 			return image;
 		} else if ((image = [UIImage imageWithContentsOfFile:[self pathForImage:aURLString]])) {
-			[self.imageCache setObject:image forKey:aURLString];
+			[self.imageCache setObject:image forKey:[[aURLString copy] autorelease] cost:1];
 			return image;
       }
 	}
@@ -181,7 +183,7 @@ SYNTHESIZE_SINGLETON_FOR_CLASS(FullyLoaded);
 	[self.inProgressURLStrings removeObject:[[request url] absoluteString]];
 	UIImage *image = [UIImage imageWithContentsOfFile:[self pathForImage:[[request url] absoluteString]]];
 	if (image) {
-		[self.imageCache setObject:image forKey:[[request url] absoluteString]];
+		[self.imageCache setObject:image forKey:[[[[request url] absoluteString] copy] autorelease] cost:1];
 		[[NSNotificationCenter defaultCenter] postNotificationName:FLImageLoadedNotification
 															object:self];		
 	} else {
@@ -193,7 +195,7 @@ SYNTHESIZE_SINGLETON_FOR_CLASS(FullyLoaded);
 {
    NSURL * nsurl = [NSURL URLWithString:aURLString];
    if (image)
-      [self.imageCache setObject:image forKey:[nsurl absoluteString]];
+      [self.imageCache setObject:image forKey:[[[nsurl absoluteString] copy] autorelease] cost:1];
 }
 
 - (void)dealloc {
