@@ -68,7 +68,7 @@ SYNTHESIZE_SINGLETON_FOR_CLASS(FullyLoaded);
 		self.inProgressURLStrings = [[NSMutableSet alloc] init];
 		self.imageCache = [[NSCache alloc] init];
       [self.imageCache setEvictsObjectsWithDiscardedContent:NO];
-      [self.imageCache setTotalCostLimit: 250];
+      [self.imageCache setTotalCostLimit: 10];
 		self.imageCachePath = [[NSSearchPathForDirectoriesInDomains(NSCachesDirectory, NSUserDomainMask, YES) lastObject] 
 							   stringByAppendingPathComponent:@"images"];
 		[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(resume) name:FLIdleNotification object:nil];
@@ -179,12 +179,12 @@ SYNTHESIZE_SINGLETON_FOR_CLASS(FullyLoaded);
 }
 
 - (void)loadImage:(ASIHTTPRequest *)request {
-//	NSLog(@"Handling: %@", [[request url] absoluteString]);
+
 	[self.inProgressURLStrings removeObject:[[request url] absoluteString]];
 	UIImage *image = [UIImage imageWithContentsOfFile:[self pathForImage:[[request url] absoluteString]]];
 	if (image) {
 		[self.imageCache setObject:image forKey:[[[[request url] absoluteString] copy] autorelease] cost:1];
-		[[NSNotificationCenter defaultCenter] postNotificationName:FLImageLoadedNotification
+		[[NSNotificationCenter defaultCenter] postNotificationName:[NSString stringWithFormat:@"FLImageLoadedNotification_%@", [self pathForImage:[[request url] absoluteString]]]
 															object:self];		
 	} else {
 		[[NSFileManager defaultManager] removeItemAtPath:[self pathForImage:[[request url] absoluteString]] error:nil];

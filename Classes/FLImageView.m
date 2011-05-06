@@ -40,29 +40,25 @@
 
 - (id)initWithFrame:(CGRect)frame {
     self = [super initWithFrame:frame];
-    if (self) {
-		[[NSNotificationCenter defaultCenter] addObserver:self 
-												 selector:@selector(imageLoaded:)
-													 name:FLImageLoadedNotification 
-												   object:nil];
-    }
     return self;
 }
 
 - (id)initWithCoder:(NSCoder *)aDecoder {
     self = [super initWithCoder:aDecoder];
-    if (self) {
-        [[NSNotificationCenter defaultCenter] addObserver:self 
-												 selector:@selector(imageLoaded:)
-													 name:FLImageLoadedNotification 
-												   object:nil];
-    }
+
     return self;
 }
+
 
 - (void)loadImageAtURLString:(NSString *)aString placeholderImage:(UIImage *)anImage {
 //	NSLog(@"Loading: %@", aString);
 	self.imageURLString = aString;
+   
+   [[NSNotificationCenter defaultCenter] addObserver:self 
+                                            selector:@selector(imageLoaded:)
+                                                name:[NSString stringWithFormat:@"FLImageLoadedNotification_%@", [[FullyLoaded sharedFullyLoaded] pathForImage:aString]]
+                                              object:nil];
+   
 	self.image = nil;
 	self.image = [[FullyLoaded sharedFullyLoaded] imageForURL:self.imageURLString];
 	if (self.image == nil)
@@ -72,16 +68,22 @@
 
 - (void)imageLoaded:(NSNotification *)aNote {
 	UIImage *anImage = [[FullyLoaded sharedFullyLoaded] imageForURL:self.imageURLString];
+
 	if (anImage) {
 		self.image = anImage;
 		[self.superview setNeedsDisplay];
 	}
+
 }
 
 - (void)dealloc {
-	[[NSNotificationCenter defaultCenter] removeObserver:self
-													name:FLImageLoadedNotification
-												  object:nil];
+   
+   if (self.imageURLString) {
+      [[NSNotificationCenter defaultCenter] removeObserver:self
+                                                      name:[NSString stringWithFormat:@"FLImageLoadedNotification_%@", [[FullyLoaded sharedFullyLoaded] pathForImage:self.imageURLString]]
+                                                    object:nil];
+   }
+   
 	self.imageURLString = nil;
     [super dealloc];
 }
