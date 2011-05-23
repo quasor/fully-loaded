@@ -77,15 +77,9 @@
 }
 
 - (void)dealloc {
-   
-   if (self.imageURLString) {
-      [[NSNotificationCenter defaultCenter] removeObserver:self
-                                                      name:[NSString stringWithFormat:@"FLImageLoadedNotification_%@", [[FullyLoaded sharedFullyLoaded] pathForImage:self.imageURLString]]
-                                                    object:nil];
-   }
-   
+   [[NSNotificationCenter defaultCenter] removeObserver:self];   
 	self.imageURLString = nil;
-    [super dealloc];
+   [super dealloc];
 }
 
 
