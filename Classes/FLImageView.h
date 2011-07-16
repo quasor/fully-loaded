@@ -32,5 +32,5 @@
 }
 
 - (void)loadImageAtURLString:(NSString *)aString placeholderImage:(UIImage *)anImage;
-
+- (void)expireImageForURL:(NSString *)aURLString;
 @end

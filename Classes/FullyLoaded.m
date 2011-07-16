@@ -198,6 +198,12 @@ SYNTHESIZE_SINGLETON_FOR_CLASS(FullyLoaded);
       [self.imageCache setObject:image forKey:[[[nsurl absoluteString] copy] autorelease] cost:1];
 }
 
+- (void)expireImageForURL:(NSString *)aURLString {
+
+   [self.imageCache removeObjectForKey:aURLString];
+   [[NSFileManager defaultManager] removeItemAtPath:[self pathForImage:aURLString] error:nil];
+}
+
 - (void)dealloc {
 	self.networkQueue = nil;
 	self.queueSuspensionTimer = nil;
