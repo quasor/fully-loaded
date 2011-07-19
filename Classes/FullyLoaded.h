@@ -44,5 +44,5 @@
 - (void)suspend;
 - (NSString *)pathForImage:(NSString *)aURLString;
 - (NSString *)directoryForImage:(NSString *)aURLString;
-
+- (UIImage *)imageForURL:(NSString *)aURLString useCache:(BOOL)useCache;
 @end
